@@ -1,7 +1,8 @@
 import streamlit as st
-from langchain_core.messages import HumanMessage,AIMessage,SystemMessage
+from langchain_core.messages import HumanMessage,AIMessage
 import json
 from pprint import pprint
+from langchain_core.messages import ToolMessage
 
 class DisplayResultStreamlit:
     def __init__(self,usecase,graph,user_message):
@@ -74,3 +75,40 @@ class DisplayResultStreamlit:
                 # Final response display
                 if full_response:
                     response_placeholder.write(full_response)
+
+
+        elif usecase=="Chatbot with Web":
+            # Display user message
+            with st.chat_message("user"):
+                st.write(user_message)
+            
+            # Invoke graph and get final response
+            initial_state={"messages":[HumanMessage(content=user_message)]}
+            res=graph.invoke(initial_state)
+            
+            # Display only the final AI response (skip intermediate tool messages)
+            with st.chat_message("assistant"):
+                # Find the last AIMessage with content
+                for message in reversed(res["messages"]):
+                    if type(message)==AIMessage and message.content:
+                        # Handle content - it might be a string or list
+                        content = message.content
+                        if isinstance(content, list):
+                            # If content is a list, extract text from each item
+                            text_parts = []
+                            for item in content:
+                                if isinstance(item, str):
+                                    text_parts.append(item)
+                                elif hasattr(item, 'text'):
+                                    text_parts.append(item.text)
+                                elif hasattr(item, 'content'):
+                                    text_parts.append(str(item.content))
+                                else:
+                                    text_parts.append(str(item))
+                            content = ' '.join(text_parts)
+                        elif not isinstance(content, str):
+                            content = str(content)
+                        
+                        # Use markdown for better text rendering
+                        st.markdown(content)
+                        break

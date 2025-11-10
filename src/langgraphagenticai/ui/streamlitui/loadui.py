@@ -35,7 +35,15 @@ class LoadUI:
             st.session_state["OPENAI_API_KEY"] = self.user_controls["OPENAI_API_KEY"]
             if not self.user_controls["OPENAI_API_KEY"]:
                 st.warning("Please enter your OpenAI API Key to continue.Don't have? refer https://platform.openai.com/api-keys")
-        #Usecase selection
+
+              #Usecase selection
           self.user_controls["selected_usecase"]=st.selectbox("Select the usecase",usecase_options)
 
+
+          if self.user_controls["selected_usecase"]=="Chatbot with Web":
+            os.environ["TAVILY_API_KEY"]=self.user_controls["TAVILY_API_KEY"]=st.session_state["TAVILY_API_KEY"]=st.text_input("Enter Tavily API key")
+            
+            if not self.user_controls["TAVILY_API_KEY"]:
+              st.warning("Please enter your Tavily API Key to continue.Don't have? refer https://tavily.com/api-reference")
+    
         return self.user_controls
